@@ -2,9 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../lib/api'; 
-// import Hero3D from '../../components/Hero3D'; // Hero3D tidak lagi digunakan
 import { FaGithub, FaLinkedin } from 'react-icons/fa';
-import { motion } from 'framer-motion'; // Impor framer-motion untuk animasi
+import { motion } from 'framer-motion';
 
 const HomePage = () => {
   const [profile, setProfile] = useState(null);
@@ -13,49 +12,53 @@ const HomePage = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // PERHATIAN: Ini adalah sumber error 401 Anda
-        // Endpoint '/profile/' kemungkinan besar adalah ENDPOINT PRIVAT (butuh login).
-        // Halaman Home adalah HALAMAN PUBLIK (tidak ada login).
-        // Request ini kemungkinan besar akan GAGAL (401) untuk pengunjung biasa.
         const response = await api.get('/profile/'); 
         if (response.data && response.data.length > 0) {
           setProfile(response.data[0]);
         }
       } catch (error) {
-        // Anda akan melihat error 401 Unauthorized di sini di konsol browser
-        console.error("Gagal mengambil data profile (kemungkinan 401):", error);
+        console.error("Gagal mengambil data profile:", error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, []); // [] berarti 'jalankan sekali saat mount'
+  }, []);
 
   if (loading) {
     return <div className="min-h-screen flex justify-center items-center">Loading...</div>;
   }
 
   if (!profile) {
-    // Pesan ini akan muncul jika request gagal (misalnya karena 401)
     return (
       <div className="min-h-screen flex justify-center items-center text-center px-4">
-        Gagal memuat data profile. (Jika Anda developer, cek konsol. Kemungkinan besar ini error 401 Unauthorized karena endpoint /profile/ memerlukan login).
+        Gagal memuat data profile.
       </div>
     );
   }
 
-  // Jika data ada, tampilkan Hero Section
+  // ✅ PERBAIKAN: Buat full URL untuk gambar
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    // Jika sudah full URL (http/https), return as is
+    if (imagePath.startsWith('http')) return imagePath;
+    // Jika relatif path, tambahkan base URL Railway
+    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    return `${baseURL}${imagePath}`;
+  };
+
+  const imageUrl = getImageUrl(profile.foto);
+
   return (
-    // overflow-hidden ditambahkan untuk mencegah scrollbar saat animasi slide-in
     <section className="container mx-auto min-h-screen flex items-center px-6 py-12 overflow-hidden"> 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
 
-        {/* Bagian Kiri: Teks & Info (Dengan Animasi) */}
+        {/* Bagian Kiri: Teks & Info */}
         <motion.div 
           className="flex flex-col justify-center"
-          initial={{ opacity: 0, x: -50 }} // Mulai dari kiri & transparan
-          animate={{ opacity: 1, x: 0 }}   // Masuk ke posisi normal
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <span className="text-lg text-primary-pink">Halo, nama saya</span>
@@ -66,7 +69,6 @@ const HomePage = () => {
             {profile.deskripsi_singkat}
           </p>
 
-          {/* Tombol Aksi */}
           <div className="flex flex-wrap gap-4 mb-8">
             <Link 
               to="/projects" 
@@ -82,7 +84,6 @@ const HomePage = () => {
             </Link>
           </div>
 
-          {/* Ikon Sosmed */}
           <div className="flex space-x-6">
             <a href={profile.github} target="_blank" rel="noopener noreferrer" className="text-light-text dark:text-dark-text hover:text-primary-pink transition-colors">
               <FaGithub size={30} />
@@ -93,23 +94,27 @@ const HomePage = () => {
           </div>
         </motion.div>
 
-        {/* Bagian Kanan: Foto Profil Bulat (Pengganti Hero3D) */}
+        {/* Bagian Kanan: Foto Profil Bulat */}
         <motion.div 
           className="w-full flex justify-center md:justify-end"
-          initial={{ opacity: 0, scale: 0.5 }} // Mulai dari kecil & transparan
-          animate={{ opacity: 1, scale: 1 }}   // Tampil ke ukuran normal
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          {profile.foto ? ( // Menggunakan profile.foto (sesuai AboutPage.jsx)
+          {imageUrl ? (
             <motion.img 
-              src={profile.foto} 
+              src={imageUrl}  // ✅ Gunakan full URL
               alt={profile.nama} 
               className="w-64 h-64 md:w-80 md:h-80 rounded-full object-cover shadow-2xl border-4 border-primary-pink" 
-              whileHover={{ scale: 1.05 }} // Efek hover dari AboutPage
-              transition={{ type: 'spring', stiffness: 300 }} // Transisi pegas untuk hover
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: 'spring', stiffness: 300 }}
+              onError={(e) => {
+                // ✅ Fallback jika gambar gagal load
+                console.error('Image failed to load:', imageUrl);
+                e.target.style.display = 'none';
+              }}
             />
           ) : (
-            // Fallback jika tidak ada foto
             <div className="w-64 h-64 md:w-80 md:h-80 rounded-full bg-gray-300 flex items-center justify-center text-gray-600">
               Tidak ada foto
             </div>
