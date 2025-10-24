@@ -5,8 +5,8 @@ import api from '../../lib/api';
 import { FaGithub, FaLinkedin } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
-// --- PERBAIKAN 1: Definisikan baseURL ---
-const baseURL = import.meta.env.VITE_API_URL || '';
+// --- HAPUS baseURL DARI SINI ---
+// const baseURL = import.meta.env.VITE_API_URL || ''; 
 
 const HomePage = () => {
   const [profile, setProfile] = useState(null);
@@ -15,11 +15,8 @@ const HomePage = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // --- PERBAIKAN 2: Panggil endpoint detail, BUKAN list ---
-        // Asumsi profil Anda memiliki ID = 1
+        // Panggilan ke /profile/1/ sudah benar
         const response = await api.get('/profile/1/'); 
-        
-        // --- PERBAIKAN 3: Set data langsung (karena ini objek, bukan array) ---
         setProfile(response.data);
         
       } catch (error) {
@@ -95,8 +92,8 @@ const HomePage = () => {
         >
           {profile.foto ? ( 
             <motion.img 
-              // --- PERBAIKAN 4: Tambahkan baseURL di sini ---
-              src={baseURL + profile.foto} 
+              // --- PERBAIKAN: HAPUS baseURL dari sini ---
+              src={profile.foto} 
               alt={profile.nama} 
               className="w-64 h-64 md:w-80 md:h-80 rounded-full object-cover shadow-2xl border-4 border-primary-pink" 
               whileHover={{ scale: 1.05 }} 
