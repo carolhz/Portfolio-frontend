@@ -16,7 +16,7 @@ const HomePage = () => {
     const fetchProfile = async () => {
       try {
         // Panggilan ke /profile/1/ sudah benar
-        const response = await api.get('/profile/1/'); 
+        const response = await api.get('/profile/4/'); 
         setProfile(response.data);
         
       } catch (error) {
