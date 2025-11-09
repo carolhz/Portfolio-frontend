@@ -143,7 +143,7 @@ const HomePage = () => {
         >
           {profile.foto ? (
             <motion.img 
-              src={profile.foto}
+              src={profile.? `${profile.foto.replace('http://', 'https://')}?t=${Date.now()}`: null}
               alt={profile.nama} 
               className="w-64 h-64 md:w-80 md:h-80 rounded-full object-cover shadow-2xl border-4 border-primary-pink" 
               whileHover={{ scale: 1.05 }} 
