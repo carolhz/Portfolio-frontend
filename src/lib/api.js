@@ -2,13 +2,16 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
-// 1. Tentukan baseURL
-// import.meta.env.VITE_API_URL adalah variabel yang akan kita set di Vercel/Netlify
-// Jika tidak ada (saat 'npm run dev'), gunakan string kosong agar proxy bekerja
-const baseURL = import.meta.env.VITE_API_URL || '';
+// Ambil baseURL dari env (Vercel/Production) atau fallback lokal
+let baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
+// Hapus trailing slash biar gak dobel
+if (baseURL.endsWith('/')) {
+  baseURL = baseURL.slice(0, -1);
+}
 
 const api = axios.create({
-  baseURL: baseURL + '/api', // Ini akan menjadi 'https://...railway.app/api'
+  baseURL, // udah langsung aman
 });
 
 api.interceptors.request.use(
@@ -19,9 +22,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 export default api;
